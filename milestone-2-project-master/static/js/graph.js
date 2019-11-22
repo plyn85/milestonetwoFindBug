@@ -1,6 +1,5 @@
 //calling csv data here then passing though crossfilter function
-d3.csv("milestone-2-project-master/data/data.csv", function(error, Data) {
-  if (error) throw error;
+d3.csv("milestone-2-project-master/data/data.csv").then(function(Data) {
   var ndx = crossfilter(Data);
 
   //adding functions here to be used in graph buliding functions below
