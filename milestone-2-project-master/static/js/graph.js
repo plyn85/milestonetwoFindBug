@@ -132,15 +132,15 @@ d3.csv("milestone-2-project-master/data/data.csv", function(error, Data) {
 
   // Used to override the default angle of the text in pie chart
   // Taken from tutorial found at https://stackoverflow.com/questions/38901300/rotate-pie-label-in-dc-js-pie-chart
-  pieChart.on("renderlet", function() {
-    pieChart.selectAll("text.pie-slice").attr("transform", function(d) {
-      var translate = d3.select(this).attr("transform");
-      var ang = ((((d.startAngle + d.endAngle) / 2) * 180) / Math.PI) % 360;
-      if (ang < 180) ang -= 90;
-      else ang += 90;
-      return translate + " rotate(" + ang + ")";
-    });
-  });
+  // pieChart.on("renderlet", function() {
+  //   pieChart.selectAll("text.pie-slice").attr("transform", function(d) {
+  //     var translate = d3.select(this).attr("transform");
+  //     var ang = ((((d.startAngle + d.endAngle) / 2) * 180) / Math.PI) % 360;
+  //     if (ang < 180) ang -= 90;
+  //     else ang += 90;
+  //     return translate + " rotate(" + ang + ")";
+  //   });
+  // });
   //  end of override function
 
   //scatterplot
