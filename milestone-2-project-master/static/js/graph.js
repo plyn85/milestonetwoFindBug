@@ -1,5 +1,5 @@
 //calling csv data here then passing though crossfilter function
-d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
+d3.csv("milestone-2-project-master/data/data.csv", function(error, Data) {
   if (error) throw error;
   var ndx = crossfilter(Data);
 
@@ -13,7 +13,7 @@ d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
     return d.key + " €" + d3.format(".2s")(d.value);
   };
   // setting colors variable here that will be passed into colors function in charts below
-  dc.config.defaultColors([
+  var colors = [
     "#3F1D1D",
     "#4F272D",
     "#5D323F",
@@ -28,7 +28,7 @@ d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
     "#44CDCF",
     "#47E0CE",
     "#5AF1C9"
-  ]);
+  ];
 
   //setting height an width variables that will be passed into width an height functions of graphs  charts below
   var w = 800;
@@ -114,8 +114,8 @@ d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
         .itemHeight(16)
         .gap(2)
     )
-    // .ordinalColors(colors)
-    // .ordinalColors(colors)
+    .ordinalColors(colors)
+
     .dimension(playersPositionDim)
     .group(playersPositionGroup)
     // title will display as percent when hovered
@@ -149,7 +149,7 @@ d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
     .margins(margins)
     .dimension(seasonDim)
     .group(plotGraphSeasonDimGroup)
-    // .colors(colors)
+    .colors(colors)
     .colorAccessor(function(d) {
       return d.key[5];
     })
