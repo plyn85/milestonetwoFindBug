@@ -1,7 +1,7 @@
 //calling csv data here then passing though crossfilter function
-d3.csv("data/data.csv", function(error, sportData) {
+d3.csv("milestone-2-project-masterdatadata.csv", function(error, Data) {
   if (error) throw error;
-  var ndx = crossfilter(sportData);
+  var ndx = crossfilter(Data);
 
   //adding functions here to be used in graph buliding functions below
   //changes format on x an y  axis  to display in monatary amount
