@@ -92,6 +92,20 @@ d3.csv("milestone-2-project-master/data/data.csv").then(function(sportData) {
     .group()
     .reduceSum(transferFeeTotal);
   let playersPositionGroup = playersPositionDim.group();
+
+  lineChart.renderlet(function(chart) {
+    // rotate x-axis labels
+    chart
+      .selectAll("g.x text")
+      .attr("transform", "translate(-10,10) rotate(315)");
+  });
+  scatterplot.renderlet(function(chart) {
+    // rotate x-axis labels
+    chart
+      .selectAll("g.x text")
+      .attr("transform", "translate(-10,10) rotate(315)");
+  });
+
   // end of reduce an group vatiables
   //setting function for all  charts common functions
   //every chart will be passed to this function
@@ -261,7 +275,4 @@ document.addEventListener("DOMContentLoaded", function() {
     transferHistorySection.classList.remove("hide-content");
     footer.classList.remove("hide-content");
   });
-
-  document.getElementsByClassName("x-axis text").classList.add("x-axis text");
 });
-//

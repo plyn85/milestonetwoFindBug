@@ -20,12 +20,12 @@ html {
 
 /* targeting the  graphs an charts here */
 /* targeting x axis to add angle tot text to make it visable*/
-.xaxis text {
+/* .xaxis text {
   text-anchor: end !important;
   -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
   -ms-transform: rotate(-45deg);
-}
+} */
 
 /* adding weight and font size to axis text */
 .x.axis text,
