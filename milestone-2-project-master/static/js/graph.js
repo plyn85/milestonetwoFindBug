@@ -1,17 +1,8 @@
-//calling csv data here then passing though crossfilter function
-d3.csv("milestone-2-project-master/data/data.csv").then(function(sportData) {
-  const ndx = crossfilter(sportData);
+document.addEventListener("DOMContentLoaded", function() {
+  //calling csv data here then passing though crossfilter function
+  const myData = "milestone-2-project-master/data/data.csv";
+  d3.csv(myData).then(chartBuilder);
 
-  //adding functions here to be used in graph buliding functions below
-  //changes format on x an y  axis  to display in monatary amount
-  const euroFormat = function(d) {
-    return "€" + d3.format(".2s")(d);
-  };
-
-  const euroSign = function(d) {
-    return d.key + " €" + d3.format(".2s")(d.value);
-  };
-  // setting colors variable here that will be passed into colors function in charts below
   let colors = [
     "#3F1D1D",
     "#4F272D",
@@ -41,206 +32,43 @@ d3.csv("milestone-2-project-master/data/data.csv").then(function(sportData) {
     bottom: 70,
     left: 70
   };
+  // d3.csv("milestone-2-project-master/data/data.csv").then(function(sportData) {
+  //   const ndx = crossfilter(sportData);
+  function chartBuilder(data) {
+    const ndx = crossfilter(data);
+    const allData = ndx.groupAll();
 
-  //setting scalebands ordinal units which will be passed on to the xaxis functions of charts and  Graphs below
-  const scaleBand = d3.scaleBand();
-  const ordUnits = dc.units.ordinal;
-  const scaleLinear = d3.scaleLinear();
-  //setting graphs variables for graphs an charts below
-  const lineChart = dc.lineChart("#line_graph");
-  const scatterplot = dc.scatterPlot("#scatterplot_graph");
-  const leagueRowChart = dc.rowChart("#leagues_spending_rowchart");
-  const teamsRowChart = dc.rowChart("#teams_spending_rowchart");
-  const pieChart = dc.pieChart("#piechart_players_position");
+    dc.dataCount("#total") // dc.dataCount | add to div id#total
+      .crossfilter(ndx) // apply the crossfilter
+      .groupAll(allData); // group allData from the crossfilter
 
-  //dimensions set here
-  let seasonDim = ndx.dimension(function(d) {
-    return d.Season;
-  });
-  let plottingTheDotsDim = ndx.dimension(function(d) {
-    return [
-      d.Season,
-      d.Transfer_fee,
-      d.Name,
-      d.Team_from,
-      d.Team_to,
-      d.Position
-    ];
-  });
-  let leaugeToDim = ndx.dimension(function(d) {
-    return d.League_to;
-  });
-  let topTenTeamSpendDim = ndx.dimension(function(d) {
-    return d.Team_to;
-  });
+    // d.Age = parseInt(d.Age);
+    // d.Transfer_fee = parseFloat(d.Transfer_fee);
 
-  let playersPositionDim = ndx.dimension(function(d) {
-    return [d.Position];
-  });
-  //groups
-  //setting transfer fee total to be passed into reducesum functions below
-  let transferFeeTotal = function(d) {
-    return [d.Transfer_fee];
-  };
-  let totalSpendPerSeasonDim = seasonDim.group().reduceSum(transferFeeTotal);
+    // const fullDateFormat = d3.time.format("%a, %d %b %Y %X %Z");
 
-  let plotGraphSeasonDimGroup = plottingTheDotsDim.group();
-  // console.log(plotGraphSeasonDimGroup.all());
-  let groupByTransfer = leaugeToDim.group().reduceSum(transferFeeTotal);
+    byPosition(ndx, "#piechart_players_position", "Position");
+    btTransfer(ndx, "#scatterplot_graph");
+    totalSpendTransfers(ndx, "#line_graph");
+    topTenLeaugesSpending(ndx, "#leagues_spending_rowchart");
+    topTenTeansSpending(ndx, "#teams_spending_rowchart");
+    dc.renderAll();
+  }
 
-  let topTenTeamSpendGroup = topTenTeamSpendDim
-    .group()
-    .reduceSum(transferFeeTotal);
-  let playersPositionGroup = playersPositionDim.group();
+  //piechart
+  function byPosition(ndx, divName, dimension) {
+    let pieChart = dc.pieChart(divName);
+    let dim = ndx.dimension(dc.pluck(dimension));
+    let group = dim.group();
 
-  lineChart.renderlet(function(chart) {
-    // rotate x-axis labels
-    chart
-      .selectAll("g.x text")
-      .attr("transform", "translate(-10,10) rotate(315)");
-  });
-  scatterplot.renderlet(function(chart) {
-    // rotate x-axis labels
-    chart
-      .selectAll("g.x text")
-      .attr("transform", "translate(-10,10) rotate(315)");
-  });
-
-  // end of reduce an group vatiables
-  //setting function for all  charts common functions
-  //every chart will be passed to this function
-  function allCharts(chart) {
-    chart
+    pieChart
       .width(w)
       .height(h)
-      .useViewBoxResizing(true);
+      .dim(dimension)
+      .group(group);
   }
-  //end  making charts
-  //pie chart
-  allCharts(pieChart);
-  pieChart
-    .slicesCap(13)
-    .othersGrouper(false)
-    .legend(
-      dc
-        .legend()
-        .x(4)
-        .y(0)
-        .itemHeight(16)
-        .gap(2)
-    )
 
-    // .colors(colors)
-    .dimension(playersPositionDim)
-    .group(playersPositionGroup)
-    // title will display as percent when hovered
-    .title(function(d) {
-      return (
-        d.key[0] +
-        " " +
-        Math.floor((d.value / ndx.groupAll().value()) * 100) +
-        "%"
-      );
-    })
-    .renderTitle(true);
-  // end  pie chart
-
-  // Used to override the default angle of the text in pie chart
-  // Taken from tutorial found at https://stackoverflow.com/questions/38901300/rotate-pie-label-in-dc-js-pie-chart
-  pieChart.on("renderlet", function() {
-    pieChart.selectAll("text.pie-slice").attr("transform", function(d) {
-      let translate = d3.select(this).attr("transform");
-      let ang = ((((d.startAngle + d.endAngle) / 2) * 180) / Math.PI) % 360;
-      if (ang < 180) ang -= 90;
-      else ang += 90;
-      return translate + " rotate(" + ang + ")";
-    });
-  });
-  //  end of override function
-
-  //scatterplot
-  allCharts(scatterplot);
-  scatterplot
-    .margins(margins)
-    .dimension(seasonDim)
-    .group(plotGraphSeasonDimGroup)
-    .ordinalColors(colors)
-    .colorAccessor(function(d) {
-      return d.key[5];
-    })
-    .title(function(d) {
-      return (
-        "In " +
-        d.key[0] +
-        " " +
-        d.key[2] +
-        " Was Transfered From " +
-        d.key[3] +
-        " to " +
-        d.key[4] +
-        " for €" +
-        d3.format(".2s")(d.key[1])
-      );
-    })
-    .x(scaleBand)
-    .xUnits(ordUnits)
-    .brushOn(false)
-    .symbolSize(6)
-    .clipPadding(1)
-    .renderVerticalGridLines(true)
-    .yAxis()
-    .tickFormat(euroFormat);
-  //end scatterplot function
-
-  //line chart
-  allCharts(lineChart);
-  lineChart
-    .margins(margins)
-    .dimension(seasonDim)
-    .group(totalSpendPerSeasonDim)
-    .x(scaleBand)
-    .xUnits(ordUnits)
-    .renderHorizontalGridLines(true)
-    .curve(d3.curveCatmullRom.alpha(0.5))
-    .renderArea(true)
-    .renderDataPoints(true)
-    .title(euroSign)
-    .yAxis()
-    .tickFormat(euroFormat);
-  //end of linechart
-  //adding function here for common functions in both row charts
-  function rowCharts(chart) {
-    chart
-      .margins(margins)
-      .rowsCap(10)
-      .othersGrouper(false)
-      // .ordinalColors(colors)
-      .x(scaleLinear)
-      .elasticX(true)
-      .title(euroSign)
-      .renderTitle(true)
-      .xAxis()
-      .ticks(5)
-      .tickFormat(euroFormat);
-  }
-  //league top ten row chart
-  //passed through allCharts and row Charts functions
-  allCharts(leagueRowChart);
-  rowCharts(leagueRowChart);
-  leagueRowChart.dimension(leaugeToDim).group(groupByTransfer);
-  //end league top ten row chart
-
-  //teams top ten row chart
-  //passed through allCharts and row Charts functions
-  allCharts(teamsRowChart);
-  rowCharts(teamsRowChart);
-  teamsRowChart.dimension(topTenTeamSpendDim).group(topTenTeamSpendGroup);
-  //end teams top ten row chart
-  //player position pie chart
-  dc.renderAll();
-});
-//end of graphs section
-document.addEventListener("DOMContentLoaded", function() {
+  //end of graphs section
   //adding function to target reset data btn to target  button an reset all data when clicked
   let resetBtn = document.getElementsByClassName("reset-data-btn");
   for (let i = 0; i < resetBtn.length; i++) {
@@ -276,3 +104,21 @@ document.addEventListener("DOMContentLoaded", function() {
     footer.classList.remove("hide-content");
   });
 });
+// class Chart {
+//   constructor(chart) {
+//     this.chart = chart;
+
+//     chart = this.chart;
+//     // function chartBuilder(width, height, resize) {
+//     //   this.width = dc.width();
+//     //   this.height = dc.height();
+//     //   this.resize = dc.useViewBoxResizing(true);
+//     // }
+//   }
+// }
+
+// let pieChart = new Chart(dc.pieChart("#piechart_players_position"));
+// let chart2 = new Chart(scatterplot);
+// let chart3 = new Chart(leagueRowChart);
+// let chart4 = new Chart(teamsRowChart);
+// let chart5 = new Chart(pieChart);

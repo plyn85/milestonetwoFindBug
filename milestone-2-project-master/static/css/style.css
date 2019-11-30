@@ -292,3 +292,6 @@ i {
 
 /* 
 end of media queries */
+.dc-chart svg {
+  overflow: visible;
+}
